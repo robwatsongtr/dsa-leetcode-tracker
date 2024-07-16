@@ -14,7 +14,14 @@ type Problem struct {
 	Pseudocode    string `json:"pseudocode"`
 	Diff_id       int    `json:"diff_id"`
 	Diff_level    string `json:"diff_level"`
+	Category_id   string `json:"category_id"`
+	Category_name string `json:"category_name"`
 }
+
+// type Category struct {
+// 	Id   int    `json:"id"`
+// 	Name string `json:"name"`
+// }
 
 func GetProblems(db *sql.DB) ([]Problem, error) {
 	rows, err := db.Query(
@@ -27,11 +34,15 @@ func GetProblems(db *sql.DB) ([]Problem, error) {
 			approach.approach_name,
 			problems.pseudocode, 
 			problems.diff_id, 
-			difficulty.diff_level
+			difficulty.diff_level,
+			COALESCE(categories.id, 0) AS category_id,
+			COALESCE(categories.category_name, '') AS category_name
 		FROM problems
 		INNER JOIN approach ON problems.approach_id = approach.id
 		INNER JOIN difficulty ON problems.diff_id = difficulty.id 
-		ORDER BY id `,
+		LEFT JOIN problem_categories ON problems.id = problem_categories.problem_id
+		LEFT JOIN categories ON problem_categories.category_id = categories.id 
+		ORDER BY problems.id `,
 	)
 
 	if err != nil {
@@ -54,6 +65,8 @@ func GetProblems(db *sql.DB) ([]Problem, error) {
 			&problem.Pseudocode,
 			&problem.Diff_id,
 			&problem.Diff_level,
+			&problem.Category_id,
+			&problem.Category_name,
 		); err != nil {
 			return nil, err
 		}

@@ -1,7 +1,7 @@
 
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE
+    category_name VARCHAR(100) UNIQUE
 );
 
 CREATE TABLE approach (
